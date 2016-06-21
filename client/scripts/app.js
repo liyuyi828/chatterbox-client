@@ -12,18 +12,19 @@ $(document).ready(function() {
 
     var saveApp = this;
 
-    $('.username').on('click', function() {
-      saveApp.addFriend();
+    $('#chats').on('click', '.username', function() {
+      saveApp.addFriend($(this).val());
     });
 
-    $('.submitButton').on('click', function() {
+    $('.submitButton').on('click', function(event) {
+      event.preventDefault();
       saveApp.handleSubmit($('#message').val());
+      $('#message').val('');
     });
 
     $('#roomSelect select').on('change', function() {
-      var room = $(this).val();
-
-      $('.message').children().filter('.' + room).parent().css('background-color', 'blue');
+      room = $(this).val();
+      saveApp.fetch(); 
     });
 
     setInterval(function() {
@@ -70,52 +71,64 @@ $(document).ready(function() {
   }; 
 
   App.prototype.clearMessages = function() {
-    $('#chats').children().remove();
+    $('#chats').children().hide();
   };
 
   App.prototype.addMessage = function(message) {
+
     var username = message.username || 'anonymous';
     var userMessage = message.text;
     var userRoom = message.roomname;
 
-    // Create DOM nodes for the message and append them
-    // to the chats section
-    var messageNode = $('<div class="message"></div>');
-    var userNameNode = $('<div class="username"></div>')
-        .append(document.createTextNode(username + ': '))
-        .addClass(userRoom); 
-    var userMessageNode = $('<div></div>')
-        .append(document.createTextNode(message.text));  
+    if (userRoom === room) {
+      // Create DOM nodes for the message and append them
+      // to the chats section
+      var messageNode = $('<div class="message"></div>');
+      var userNameNode = $('<div class="username"></div>')
+          .append(document.createTextNode(username + ': '))
+          .val(username);
+      var userMessageNode = $('<div></div>')
+          .append(document.createTextNode(message.text));  
 
-    messageNode.append(userNameNode);
-    messageNode.append(userMessageNode);
+      messageNode.append(userNameNode);
+      if (friends[username]) {
+        messageNode.addClass('friend');
+      }
+      messageNode.append(userMessageNode);
 
-    $('#chats').append(messageNode);
+      $('#chats').append(messageNode);
+    }
 
     // check if chat room exist, if not, create a new tag on the drop down menu
-    if ( !$('#roomSelect select').children().hasClass(userRoom) && userRoom) {
-      $('#roomSelect select').append('<option class="' + userRoom + '" value="' + userRoom + '">' + userRoom + '</option>');
+    if (allRooms[userRoom] === undefined && userRoom) {
+      allRooms[userRoom] = true; 
+      var $option = $('<option></option>').val(userRoom).text(userRoom);
+      $('#roomSelect select').append($option);
     } 
   };
-
 
   App.prototype.addRoom = function(room) {
     $('#roomSelect').append('<div>room</div>');
   };
 
-  App.prototype.addFriend = function() {
+  App.prototype.addFriend = function(friend) {
+    friends[friend] = true;
   };
 
   App.prototype.handleSubmit = function(message) {
     var messageObj = {
       username: username, 
-      text: message
+      text: message,
+      roomname: room
     };
     this.send(messageObj);
+    event.preventDefault();
   };
 
   var app = new App();
-  var messages; 
+  var messages, room;
+  var allRooms = {}; 
+  var friends = {};
   var username = window.location.search.split('=')[1]; 
   app.init(); 
 

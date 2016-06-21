@@ -8,14 +8,15 @@ var App = function () {
 App.prototype.init = function() {
   this.fetch();
 
-  // var saveApp = this;
+  var saveApp = this;
 
-  // $('.username').on('click', function() {
-  //   saveApp.addFriend();
-  // });
-  // $('#send .submit').submit(function() {
-  //   saveApp.handleSubmit();
-  // });
+  $('.username').on('click', function() {
+    saveApp.addFriend();
+  });
+
+  $('#send .submit').submit(function() {
+    saveApp.handleSubmit();
+  });
 };
 
 App.prototype.send = function (message) {
@@ -59,9 +60,13 @@ App.prototype.clearMessages = function() {
 
 App.prototype.addMessage = function(message) {
   var username = message.username || 'anonymous';
-  var userMessage = message.text; 
-  $('#chats').append('<div><span class="username">' + username + '</span>' + userMessage + '</div>');
+  var userMessage = message.text;
+  var userNameNode = $('<div class="username"></div>').append(document.createTextNode(username + ': ')); 
+  var userMessageNode = $('<div></div>').append(document.createTextNode(message.text));  
+
+  $('#chats').append('<div class="message"></div>').append(userNameNode).append(userMessageNode);
 };
+
 
 App.prototype.addRoom = function(room) {
   $('#roomSelect').append('<div>room</div>');
@@ -71,7 +76,7 @@ App.prototype.addFriend = function() {
 };
 
 App.prototype.handleSubmit = function() {
-  console.log("hello");
+  console.log('hello');
 };
 
 var app = new App();
